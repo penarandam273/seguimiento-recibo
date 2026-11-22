@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -28,6 +30,10 @@ import androidx.webkit.WebViewAssetLoader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Locale;
+
+import org.json.JSONObject;
 
 /**
  * Seguimiento de Recibo para Android.
@@ -38,11 +44,13 @@ import java.io.OutputStream;
 public class MainActivity extends Activity {
     private static final String HOST = "appassets.androidplatform.net";
     private static final String INICIO = "https://" + HOST + "/assets/web/index.html";
-    private static final int CAMARA = 1, GALERIA = 2;
+    private static final int CAMARA = 1, GALERIA = 2, VOZ = 3;
 
     private WebView web;
     private ValueCallback<Uri[]> elegido;
     private Uri fotoUri;
+    private TextToSpeech voz;
+    private boolean vozLista;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -98,6 +106,14 @@ public class MainActivity extends Activity {
 
         web.addJavascriptInterface(new Puente(), "ReciboApp");
 
+        // voz del agente de Luis (el WebView no trae voz propia)
+        voz = new TextToSpeech(this, estado -> {
+            if (estado != TextToSpeech.SUCCESS) return;
+            int r = voz.setLanguage(new Locale("es", "CO"));
+            if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) voz.setLanguage(new Locale("es"));
+            vozLista = true;
+        });
+
         if (b != null) web.restoreState(b);
         else web.loadUrl(INICIO + invitacion(getIntent()));
     }
@@ -121,6 +137,17 @@ public class MainActivity extends Activity {
     protected void onSaveInstanceState(Bundle b) {
         super.onSaveInstanceState(b);
         web.saveState(b);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (voz != null) voz.shutdown();
+        super.onDestroy();
+    }
+
+    private void devolverVoz(String texto, String error) {
+        String js = "window.__agenteVoz && window.__agenteVoz(" + JSONObject.quote(texto == null ? "" : texto) + "," + (error == null ? "null" : JSONObject.quote(error)) + ")";
+        runOnUiThread(() -> web.evaluateJavascript(js, null));
     }
 
     @Override
@@ -161,6 +188,15 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int pedido, int resultado, Intent datos) {
         super.onActivityResult(pedido, resultado, datos);
+        if (pedido == VOZ) {
+            String t = "";
+            if (resultado == RESULT_OK && datos != null) {
+                ArrayList<String> l = datos.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                if (l != null && !l.isEmpty()) t = l.get(0);
+            }
+            devolverVoz(t, null);
+            return;
+        }
         if (elegido == null) return;
         Uri[] r = null;
         if (resultado == RESULT_OK) {
@@ -226,6 +262,35 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 return "No se pudo guardar: " + e.getMessage();
             }
+        }
+
+        /** Lee en voz alta la respuesta del agente. */
+        @JavascriptInterface
+        public void hablar(String texto) {
+            if (voz == null || !vozLista || texto == null) return;
+            String t = texto.length() > 3900 ? texto.substring(0, 3900) : texto;
+            runOnUiThread(() -> voz.speak(t, TextToSpeech.QUEUE_FLUSH, null, "agente"));
+        }
+
+        @JavascriptInterface
+        public void callar() {
+            if (voz != null) runOnUiThread(() -> voz.stop());
+        }
+
+        /** Abre el dictado de Google; el texto vuelve a la pagina por window.__agenteVoz. */
+        @JavascriptInterface
+        public void escuchar() {
+            runOnUiThread(() -> {
+                try {
+                    Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                    i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                    i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-CO");
+                    i.putExtra(RecognizerIntent.EXTRA_PROMPT, "Habla con tu agente");
+                    startActivityForResult(i, VOZ);
+                } catch (Exception e) {
+                    devolverVoz("", "Este celular no tiene dictado por voz. Instala o actualiza la app de Google.");
+                }
+            });
         }
 
         @JavascriptInterface

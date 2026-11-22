@@ -307,6 +307,50 @@ details>div{display:flex;flex-direction:column;gap:10px;margin-top:8px}
 .notasChips .fchip{font-weight:500}
 .notasChips .fchip[aria-pressed="true"]{background:var(--surface-2);border-color:var(--accent);color:var(--ink)}
 .aviso{background:var(--warn-soft);border:1px solid var(--warn);color:var(--ink);border-radius:var(--r);padding:10px 12px;margin:0 0 10px}.aviso p{margin:0 0 8px}
+/* ---------- agente de Luis ---------- */
+.agBtn{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:35;display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:11px 16px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14.5px;box-shadow:0 6px 18px rgba(16,24,40,.25);cursor:pointer}
+.agBtn[data-alerta]::after{content:attr(data-alerta);background:var(--bad);color:#fff;border-radius:999px;font-size:11.5px;min-width:20px;padding:1px 6px;text-align:center}
+.agPanel{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:45;width:min(440px,calc(100vw - 24px));height:min(680px,calc(100vh - 24px - env(safe-area-inset-top,0px)));background:var(--surface);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 48px rgba(16,24,40,.28);display:flex;flex-direction:column;overflow:hidden}
+@media (max-width:560px){.agPanel{right:0;left:0;bottom:0;width:auto;height:calc(100vh - env(safe-area-inset-top,0px));height:calc(100dvh - env(safe-area-inset-top,0px));border-radius:14px 14px 0 0}}
+.agHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.agHead b{font-family:var(--f-head);font-size:19px;display:block}
+.agHead small{color:var(--muted);font-size:12.5px}
+.agSeg{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.agSeg button{flex:1;border:1px solid transparent;background:none;border-radius:8px;padding:7px 6px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.agSeg button[aria-selected="true"]{background:var(--surface);border-color:var(--line-2);color:var(--ink)}
+.agBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px;overflow:auto}
+#agChatV{overflow:hidden}
+.agLog{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:2px}
+.agMsg{max-width:92%;padding:9px 12px;border-radius:12px;line-height:1.42;font-size:14.5px;overflow-wrap:anywhere}
+.agMsg p{margin:0 0 6px}.agMsg p:last-child{margin:0}.agMsg ul{margin:4px 0 6px;padding-left:18px}
+.agMsg.u{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px}
+.agMsg.m{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:4px}
+.agMsg.m.err{border-color:var(--bad);background:var(--bad-soft)}
+.agMsg code{font-family:var(--f-mono);font-size:12.5px;background:var(--na-soft);padding:0 4px;border-radius:4px}
+.agMsg pre{font-family:var(--f-mono);font-size:12px;background:var(--na-soft);padding:8px;border-radius:6px;overflow-x:auto;white-space:pre-wrap}
+.agAcc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.agMeta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:12px;color:var(--muted)}
+.agMeta a{color:var(--accent)}
+.agMeta button{border:0;background:none;color:var(--accent);font-size:12px;cursor:pointer;padding:0}
+.agAprendi{font-size:12.5px;color:var(--ok);margin-top:6px}
+.agOpts{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--ink-2)}
+.agOpts label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.agOpts .lnkB{margin-left:auto;border:0;background:none;color:var(--accent);font-size:13px;cursor:pointer;padding:0}
+.agForm{display:flex;gap:6px;align-items:flex-end}
+.agForm textarea{flex:1;resize:none;min-height:44px;max-height:140px;border:1px solid var(--line-2);border-radius:8px;padding:10px;font:inherit;font-size:15px;background:var(--surface);color:var(--ink)}
+.agForm .btn{min-width:46px;padding:10px}
+#agMic[aria-pressed="true"]{background:var(--bad);color:#fff;border-color:var(--bad)}
+.agPens{align-self:flex-start;color:var(--muted);font-size:13px;padding:4px 2px}
+.agItem{display:grid;grid-template-columns:22px 1fr;gap:4px 8px;padding:9px 0;border-bottom:1px solid var(--line)}
+.agItem .ic{font-size:15px;line-height:1.3}
+.agItem b{display:block;font-size:14px}
+.agItem span{font-size:13.5px;color:var(--ink-2)}
+.agItem .btn{grid-column:2;justify-self:start;margin-top:4px}
+.agLec{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.agLec small{display:block;color:var(--muted);font-size:12px}
+.agLecForm{display:flex;gap:6px}
+.agLecForm input{flex:1;border:1px solid var(--line-2);border-radius:8px;padding:9px 10px;font:inherit;background:var(--surface);color:var(--ink)}
+.agPasos{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
 </style>
 
 <header class="top">
@@ -630,6 +674,44 @@ details>div{display:flex;flex-direction:column;gap:10px;margin-top:8px}
 <input type="file" id="fIdGal" class="vh" accept="image/*" tabindex="-1">
 <div class="tip" id="tip" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<button class="agBtn" id="agBtn" type="button" hidden aria-label="Abrir el agente de Luis"><span aria-hidden="true">🤖</span><span>Agente</span></button>
+<div class="agPanel" id="agPanel" role="dialog" aria-label="Agente de Luis" hidden>
+  <div class="agHead">
+    <div><b>Agente de Luis</b><small id="agSub">Diagnóstico, ayuda y aprendizaje</small></div>
+    <button class="btn sm" id="agCerrar" type="button" aria-label="Cerrar el agente">✕</button>
+  </div>
+  <div class="agSeg" role="tablist" aria-label="Secciones del agente">
+    <button type="button" role="tab" data-v="chat" aria-selected="true">Conversar</button>
+    <button type="button" role="tab" data-v="diag" aria-selected="false">Diagnóstico</button>
+    <button type="button" role="tab" data-v="lec" aria-selected="false">Lecciones</button>
+  </div>
+  <div class="agBody" id="agChatV">
+    <div class="agLog" id="agLog" aria-live="polite"></div>
+    <div class="agOpts">
+      <label><input type="checkbox" id="agVoz"> Leer en voz alta</label>
+      <label><input type="checkbox" id="agWeb"> Buscar en internet</label>
+      <button class="lnkB" id="agNueva" type="button">Nueva conversación</button>
+    </div>
+    <form class="agForm" id="agForm">
+      <textarea id="agTxt" rows="1" placeholder="Pregúntame o dime qué está fallando…" aria-label="Mensaje para el agente"></textarea>
+      <button class="btn" id="agMic" type="button" aria-pressed="false" aria-label="Hablarle al agente">🎤</button>
+      <button class="btn primary" id="agEnviar" type="submit" aria-label="Enviar">➤</button>
+    </form>
+  </div>
+  <div class="agBody" id="agDiagV" hidden>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn sm primary" id="agDiagBtn" type="button">Revisar todo</button>
+      <button class="btn sm" id="agDiagPreg" type="button">Pedirle al agente que lo explique</button>
+      <button class="btn sm" id="agDiagDl" type="button">Descargar diagnóstico</button>
+    </div>
+    <div id="agDiag"><p class="note">Toca «Revisar todo» para revisar la nube, el puente de Drive, lo pendiente y los errores de este equipo.</p></div>
+  </div>
+  <div class="agBody" id="agLecV" hidden>
+    <p class="note">Lo que le enseñes queda guardado en tu Drive y el agente lo sigue en cada respuesta. También aprende solo cuando lo corriges.</p>
+    <form class="agLecForm" id="agLecForm"><input id="agLecTxt" placeholder="Ej.: Edwin trabaja en el turno de la tarde" aria-label="Lección nueva"><button class="btn sm primary" type="submit">Enseñar</button></form>
+    <div id="agLec"></div>
+  </div>
+</div>
 
 <script src="entorno.js"></script>
 <script>
@@ -682,7 +764,7 @@ function isoWeek(iso){
   return y + '-S' + pad(w);
 }
 const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
-function toast(msg, ms=2600){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, ms); }
+function toast(msg, ms=2600){ agLog('aviso', msg); const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, ms); }
 // Ventana para iniciar un día nuevo: el nombre del auditor es obligatorio
 function pedirAuditor(fecha, vieja){
   return new Promise(res => {
@@ -3130,6 +3212,323 @@ function initNotas(){
   $('#edObs').addEventListener('input', () => renderNotas());
 }
 
+// ---------- agente de Luis (solo Luis) ----------
+// Diagnóstico y reparaciones aquí mismo; la conversación va por el puente de Drive a Gemini (la clave vive en el puente, nunca en la página).
+function agLog(tipo, txt){
+  const k = tipo === 'aviso' ? 'rc_ag_avisos' : 'rc_ag_err', tope = tipo === 'aviso' ? 15 : 30;
+  try { const a = lsGet(k, []); a.push({h: Date.now(), tipo, t: String(txt || '').slice(0, 300)}); lsSet(k, a.slice(-tope)); } catch {}
+}
+window.addEventListener('error', e => agLog('error', (e.message || 'Error') + (e.filename ? ' @' + String(e.filename).split('/').pop() + ':' + e.lineno : '')));
+window.addEventListener('unhandledrejection', e => agLog('promesa', errTxt(e.reason)));
+const AG = {abierto: false, vista: 'chat', chat: lsGet('rc_ag_chat', []), voz: lsGet('rc_ag_voz', true), web: lsGet('rc_ag_web', false),
+  diag: null, diagH: 0, ocupado: false, lecciones: null, rec: null, escuchando: false, olvidar: '', nueva: false};
+const AG_TABS = ['registro', 'tablero', 'imprimir', 'ajustes'];
+const agPuede = () => !!quienEsta().luis && !!(window.entorno && window.entorno.agente);
+const agLlamar = (tool, input) => window.entorno.agente(tool, input || {});
+
+function agMd(t){
+  const bloques = String(t || '').split(/```/);
+  return bloques.map((b, i) => {
+    if (i % 2) return '<pre>' + esc(b.replace(/^[a-z]*\n/i, '')) + '</pre>';
+    const lineas = esc(b).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>').split('\n');
+    let html = '', lista = false;
+    for (const l of lineas) {
+      const m = l.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)/);
+      if (m) { if (!lista) { html += '<ul>'; lista = true; } html += '<li>' + m[1] + '</li>'; continue; }
+      if (lista) { html += '</ul>'; lista = false; }
+      if (l.trim()) html += '<p>' + l + '</p>';
+    }
+    return html + (lista ? '</ul>' : '');
+  }).join('');
+}
+function agSinMd(t){ return String(t || '').replace(/```[\s\S]*?```/g, ' ').replace(/[*_`#>]/g, '').replace(/https?:\/\/\S+/g, 'el enlace'); }
+
+// ---------- voz ----------
+function agHablar(t){
+  const txt = agSinMd(t).slice(0, 1500);
+  if (!txt.trim()) return;
+  try { if (window.ReciboApp && window.ReciboApp.hablar) { window.ReciboApp.hablar(txt); return; } } catch {}
+  if (!('speechSynthesis' in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    const vs = speechSynthesis.getVoices(), v = vs.find(x => /^es[-_]CO/i.test(x.lang)) || vs.find(x => /^es[-_](419|MX|US)/i.test(x.lang)) || vs.find(x => /^es/i.test(x.lang));
+    if (v) u.voice = v; u.lang = v ? v.lang : 'es-CO'; u.rate = 1.02;
+    speechSynthesis.speak(u);
+  } catch {}
+}
+function agCallar(){ try { if (window.ReciboApp && window.ReciboApp.callar) window.ReciboApp.callar(); } catch {} try { speechSynthesis.cancel(); } catch {} }
+function agMic(){
+  const btn = $('#agMic');
+  agCallar();
+  const listo = (txt, final) => {
+    $('#agTxt').value = txt; agAltura();
+    if (final && txt.trim()) agEnviar(txt.trim());
+  };
+  if (window.ReciboApp && window.ReciboApp.escuchar) {
+    window.__agenteVoz = (txt, error) => { btn.setAttribute('aria-pressed', 'false'); if (error) toast(error, 3800); else listo(String(txt || ''), true); };
+    btn.setAttribute('aria-pressed', 'true');
+    try { window.ReciboApp.escuchar(); } catch (e) { btn.setAttribute('aria-pressed', 'false'); toast('No se pudo abrir el micrófono.', 3500); }
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Este navegador no reconoce la voz. Ábrelo en Chrome o usa la app.', 4200); return; }
+  if (AG.escuchando && AG.rec) { AG.rec.stop(); return; }
+  const r = new SR(); AG.rec = r;
+  r.lang = 'es-CO'; r.interimResults = true; r.maxAlternatives = 1;
+  let final = '';
+  r.onresult = ev => {
+    let parcial = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) { const x = ev.results[i]; if (x.isFinal) final += x[0].transcript; else parcial += x[0].transcript; }
+    listo((final + ' ' + parcial).trim(), false);
+  };
+  r.onerror = ev => { if (ev.error === 'not-allowed') toast('Permite el micrófono para hablarle al agente.', 4200); else if (ev.error !== 'no-speech' && ev.error !== 'aborted') toast('No te escuché bien (' + ev.error + ').', 3200); };
+  r.onend = () => { AG.escuchando = false; btn.setAttribute('aria-pressed', 'false'); if (final.trim()) listo(final.trim(), true); };
+  AG.escuchando = true; btn.setAttribute('aria-pressed', 'true');
+  try { r.start(); } catch { AG.escuchando = false; btn.setAttribute('aria-pressed', 'false'); }
+}
+
+// ---------- diagnóstico ----------
+function agUltSubidaDrive(){
+  const inf = DV.info || {}, h = inf.hist || null;
+  return Math.max(h ? h.subido || 0 : 0, ...Object.values(inf.semanas || {}).map(x => x.subido || 0), ...Object.values(inf.planillas || {}).map(x => x.subido || 0), 0);
+}
+async function agDiagnosticar(){
+  const it = [], add = (k, nivel, t, fix) => it.push({k, nivel, t, fix: fix || null});
+  const e = quienEsta(), pls = activas();
+  const enLinea = navigator.onLine !== false;
+  add('Internet', enLinea ? 'ok' : 'bad', enLinea ? 'Hay conexión.' : 'Sin señal. Lo registrado queda guardado en este equipo y sube solo al volver la señal.');
+  if (S.cloud === 'on' && (e.luis || e.equipo)) add('Nube del equipo', 'ok', e.luis ? 'Conectado como Luis.' : 'Conectado con código de equipo.');
+  else if (S.cloud === 'wait') add('Nube del equipo', 'warn', 'Todavía conectando con la nube…', {tipo: 'diagnosticar', texto: 'Revisar otra vez'});
+  else add('Nube del equipo', 'bad', 'Este equipo no está conectado a la nube del equipo.', {tipo: 'ir', tab: 'ajustes', texto: 'Ir a Ajustes'});
+  if (S.err) add('Sincronización', 'bad', S.err, {tipo: 'sincronizar', texto: 'Sincronizar ahora'});
+  const plP = pls.filter(p => p._dirty).length, foP = S.pendFotos.size, arP = S.artDirty.size + S.artDel.size;
+  if (plP || foP || arP) add('Pendiente por subir', enLinea ? 'warn' : 'bad', plP + ' planillas, ' + foP + ' fotos y ' + arP + ' artículos esperan subir.' + (S.syncing ? ' (subiendo ahora)' : ''), {tipo: 'sincronizar', texto: 'Subir ahora'});
+  else add('Pendiente por subir', 'ok', 'Nada pendiente en este equipo.');
+  const loc = soloLocalPl().length;
+  if (loc) add('Planillas solo en este equipo', 'warn', loc + ' planilla(s) existen aquí y no en la nube.', {tipo: 'subir_locales', texto: 'Subirlas'});
+  let drive = null;
+  if (!DV.mcp && !(window.entorno.hayPuente && window.entorno.hayPuente())) add('Puente de Google Drive', 'bad', 'Google Drive no está conectado en este equipo.', {tipo: 'recargar', texto: 'Recargar la app'});
+  else if (!enLinea) add('Puente de Google Drive', 'warn', 'Sin señal: no se puede probar ahora.');
+  else {
+    const t0 = Date.now();
+    try { drive = await agLlamar('agente_drive', {}); add('Puente de Google Drive', 'ok', 'Responde bien (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s).'); }
+    catch (x) {
+      const c = x && x.code;
+      add('Puente de Google Drive', 'bad', c === 'sin_acceso' ? 'El puente no reconoce la sesión. Cierra sesión y entra otra vez como Luis.' : 'No responde: ' + errTxt(x), {tipo: 'diagnosticar', texto: 'Probar otra vez'});
+    }
+  }
+  const ult = agUltSubidaDrive();
+  if (DV.msg && DV.msgTipo !== 'ok') add('Subida a Drive', 'bad', DV.msg, {tipo: 'subir_drive', texto: 'Actualizar Drive ahora'});
+  else if (!ult) add('Subida a Drive', 'warn', 'Todavía no se ha subido nada a Drive desde este equipo.', {tipo: 'subir_drive', texto: 'Actualizar Drive ahora'});
+  else if (ultimoCambio() > ult + 1000) add('Subida a Drive', 'warn', 'Hay cambios desde la última subida (' + horaTxt(ult) + ').', {tipo: 'subir_drive', texto: 'Actualizar Drive ahora'});
+  else add('Subida a Drive', 'ok', 'Al día · última subida ' + horaTxt(ult) + (DV.auto ? ' · automática activada' : ' · automática apagada') + '.');
+  if (drive && drive.maestro) add('Archivo maestro', 'ok', drive.maestro.nombre + ' · actualizado ' + horaTxt(Date.parse(drive.maestro.actualizado)) + ' · ' + drive.maestro.kb + ' KB.');
+  else if (drive) add('Archivo maestro', 'warn', 'No encontré el archivo maestro en la carpeta de Drive.', {tipo: 'subir_drive', texto: 'Crearlo ahora'});
+  // auditores según la nube
+  const porAud = {};
+  for (const p of pls) { const n = (p.auditor && p.auditor.nombre) || ''; if (!n) continue; const a = porAud[n] || (porAud[n] = {planillas: 0, conf: 0, ultima: ''}); a.planillas++; a.conf += (p.filas || []).length; if ((p.fecha || '') > a.ultima) a.ultima = p.fecha; }
+  const nAud = Object.keys(porAud).length;
+  add('Auditores', nAud ? 'ok' : 'warn', nAud ? Object.entries(porAud).map(([n, a]) => n + ': ' + a.planillas + ' planillas, ' + a.conf + ' conf., última ' + fmtD(a.ultima)).join(' · ') : 'Ninguna planilla tiene auditor todavía.');
+  const sinAud = pls.filter(p => !(p.auditor && p.auditor.nombre));
+  if (sinAud.length) add('Planillas sin auditor', 'warn', sinAud.length + ' planilla(s) sin auditor: ' + sinAud.slice(0, 4).map(p => fmtD(p.fecha)).join(', ') + '.', {tipo: 'ir', tab: 'registro', texto: 'Ir a Registro'});
+  const vacias = pls.filter(p => !(p.filas || []).length && p.fecha < today());
+  if (vacias.length) add('Planillas vacías', 'warn', vacias.length + ' planilla(s) de días pasados sin conferencias: ' + vacias.slice(0, 4).map(p => fmtD(p.fecha) + ' (' + ((p.auditor && p.auditor.nombre) || 'sin auditor') + ')').join(', ') + '. Puede que estén solo en el celular del auditor.');
+  if (!(S.aud && S.aud.nombre)) add('Auditor de este equipo', 'warn', 'Falta poner el auditor de este equipo.', {tipo: 'ir', tab: 'ajustes', texto: 'Ir a Ajustes'});
+  try {
+    const est = navigator.storage && navigator.storage.estimate && await navigator.storage.estimate();
+    if (est && est.quota) { const pct = Math.round(est.usage / est.quota * 100); add('Espacio del equipo', pct > 80 ? 'warn' : 'ok', 'Usado ' + pct + ' % (' + Math.round(est.usage / 1048576) + ' MB).'); }
+  } catch {}
+  const errs = lsGet('rc_ag_err', []).filter(x => Date.now() - x.h < 86400000);
+  if (errs.length) add('Errores de las últimas 24 h', 'warn', errs.length + ' error(es). El último: ' + errs[errs.length - 1].t, {tipo: 'chat', texto: 'Que el agente los revise'});
+  else add('Errores de las últimas 24 h', 'ok', 'Ninguno.');
+  let ver = 'Página web';
+  try { if (window.ReciboApp) ver = 'App Android ' + (window.ReciboApp.version ? window.ReciboApp.version() : ''); } catch {}
+  AG.diag = {fecha: new Date().toISOString(), version: ver, items: it, drive,
+    planillas: pls.slice(0, 15).map(p => ({fecha: p.fecha, auditor: (p.auditor && p.auditor.nombre) || '', conferencias: (p.filas || []).length, fotos: Object.keys(p.fotos || {}).length, porSubir: !!p._dirty})),
+    errores: lsGet('rc_ag_err', []).slice(-10).map(x => ({hora: new Date(x.h).toISOString(), tipo: x.tipo, t: x.t})),
+    avisos: lsGet('rc_ag_avisos', []).slice(-8).map(x => ({hora: new Date(x.h).toISOString(), t: x.t})),
+    pestana: tab, auditorEquipo: (S.aud && S.aud.nombre) || ''};
+  AG.diagH = Date.now();
+  agMarcarAlerta();
+  return AG.diag;
+}
+function agMarcarAlerta(){
+  const b = $('#agBtn'); if (!b) return;
+  const n = AG.diag ? AG.diag.items.filter(x => x.nivel === 'bad').length : 0;
+  if (n) b.dataset.alerta = n; else delete b.dataset.alerta;
+}
+function agPintarDiag(){
+  const box = $('#agDiag'), d = AG.diag;
+  if (!d) return;
+  const ic = {ok: '✅', warn: '⚠️', bad: '❌'};
+  box.innerHTML = '<p class="note">Revisado ' + horaTxt(Date.parse(d.fecha)) + ' · ' + esc(d.version) + '</p>' + d.items.map((x, i) =>
+    '<div class="agItem"><span class="ic" aria-hidden="true">' + ic[x.nivel] + '</span><div><b>' + esc(x.k) + '</b><span>' + esc(x.t) + '</span></div>' +
+    (x.fix ? '<button class="btn sm" type="button" data-fix="' + i + '">' + esc(x.fix.texto) + '</button>' : '') + '</div>').join('');
+}
+
+// ---------- acciones (Luis las toca; nunca se ejecutan solas) ----------
+async function agAccion(a){
+  if (!a || !a.tipo) return;
+  try {
+    switch (a.tipo) {
+      case 'sincronizar': toast('Sincronizando…'); await sync(); toast(S.err ? 'Sincronización con errores: ' + S.err : 'Sincronización lista.', 3800); break;
+      case 'subir_drive': toast('Actualizando Google Drive…'); await subirDrive(true); toast(DV.msg || 'Google Drive actualizado.', 3800); break;
+      case 'subir_locales': { const b = $('#btnSubirLocal'); if (b && !b.hidden) { setTab('ajustes'); b.click(); } else toast('No hay planillas que estén solo en este equipo.'); break; }
+      case 'diagnosticar': agVista('diag'); await agRevisar(); break;
+      case 'recargar': location.reload(); break;
+      case 'ir': if (AG_TABS.includes(a.tab)) { setTab(a.tab); agCerrar(); } break;
+      case 'copiar': {
+        const t = String(a.contenido || a.texto || '');
+        try { await navigator.clipboard.writeText(t); } catch { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch {} ta.remove(); }
+        toast('Copiado. Pégalo donde lo necesites.'); break;
+      }
+      case 'abrir': {
+        const u = String(a.url || '');
+        if (!/^https:\/\/([a-z0-9-]+\.)*(github\.com|google\.com|supabase\.com|github\.io)(\/|$)/i.test(u)) { toast('Ese enlace no está permitido desde el agente.'); break; }
+        const l = document.createElement('a'); l.href = u; l.target = '_blank'; l.rel = 'noopener'; document.body.appendChild(l); l.click(); l.remove(); break;
+      }
+      case 'descargar_diagnostico': {
+        const d = AG.diag || await agDiagnosticar();
+        await guardar('diagnostico-recibo-' + today() + '.json', new Blob([JSON.stringify(d, null, 2)], {type: 'application/json'})); break;
+      }
+      case 'chat': agVista('chat'); agEnviar('Revisa los errores y avisos recientes de la app y dime qué los causa y cómo lo arreglo.'); break;
+      default: toast('No conozco esa acción: ' + a.tipo);
+    }
+  } catch (e) { toast('No se pudo: ' + errTxt(e), 4200); }
+}
+
+// ---------- conversación ----------
+function agGuardarChat(){ lsSet('rc_ag_chat', AG.chat.slice(-40)); }
+function agPintarChat(){
+  const log = $('#agLog');
+  if (!AG.chat.length) {
+    log.innerHTML = '<div class="agMsg m"><p>Hola, Luis. Soy tu agente de Recibo. Puedo revisar la app y arreglar lo que falle, y ayudarte con Excel, correos, informes, logística de recibo, programación, Google, Android y el proyecto.</p><p>Escríbeme o toca 🎤 y háblame.</p></div>';
+  } else {
+    log.innerHTML = AG.chat.map((m, i) => {
+      if (m.r === 'u') return '<div class="agMsg u">' + agMd(m.t) + '</div>';
+      let h = '<div class="agMsg m' + (m.err ? ' err' : '') + '">' + agMd(m.t);
+      if (m.acc && m.acc.length) h += '<div class="agAcc">' + m.acc.map((a, j) => '<button class="btn sm" type="button" data-m="' + i + '" data-a="' + j + '">' + esc(a.texto || a.tipo) + '</button>').join('') + '</div>';
+      if (m.ap) h += '<div class="agAprendi">✓ Aprendí: ' + esc(m.ap) + '</div>';
+      const meta = [];
+      if (m.fu && m.fu.length) meta.push('Fuentes: ' + m.fu.map(f => '<a href="' + esc(f.u) + '" target="_blank" rel="noopener">' + esc(String(f.t).slice(0, 40)) + '</a>').join(' · '));
+      if (!m.err) meta.push('<button type="button" data-hablar="' + i + '">🔊 Escuchar</button>');
+      if (m.mo) meta.push(esc(m.mo));
+      if (meta.length) h += '<div class="agMeta">' + meta.join('') + '</div>';
+      return h + '</div>';
+    }).join('');
+  }
+  if (AG.ocupado) log.insertAdjacentHTML('beforeend', '<div class="agPens">Pensando…</div>');
+  log.scrollTop = log.scrollHeight;
+}
+async function agEnviar(texto){
+  texto = String(texto || '').trim();
+  if (!texto || AG.ocupado) return;
+  if (!agPuede()) { toast('El agente es solo para Luis: inicia sesión con tu cuenta.', 4200); return; }
+  if (navigator.onLine === false) { toast('Sin señal: el agente necesita internet para conversar. El diagnóstico sí funciona.', 4200); return; }
+  $('#agTxt').value = ''; agAltura();
+  AG.chat.push({r: 'u', t: texto}); AG.ocupado = true; agPintarChat();
+  try {
+    const contexto = (Date.now() - AG.diagH < 120000 && AG.diag) ? AG.diag : await agDiagnosticar().catch(() => null);
+    const res = await agLlamar('agente', {mensajes: AG.chat.filter(m => !m.err).slice(-20).map(m => ({r: m.r, t: m.t})), contexto, web: AG.web});
+    if (res.sinClave) {
+      AG.chat.push({r: 'm', err: true, t: 'Todavía no tengo cerebro: falta la clave gratis de Gemini. Hazlo una sola vez:\n1. Abre Google AI Studio con tu cuenta de Google y toca **Create API key** (es gratis).\n2. Copia la clave.\n3. Abre el proyecto del puente → ⚙️ **Configuración del proyecto** → **Propiedades del script** → **Agregar propiedad**: nombre `GEMINI_KEY` y en valor pega la clave → **Guardar**.\n4. Vuelve aquí y pregúntame otra vez.\nLa clave queda solo en el puente: nunca pasa por la app.',
+        acc: [{tipo: 'abrir', texto: 'Abrir AI Studio', url: 'https://aistudio.google.com/apikey'}, {tipo: 'abrir', texto: 'Abrir el puente', url: 'https://script.google.com/home/projects/1HjsqjsL1VzgtJSfrFei5ZiTTBWvsaeWZ-pKU5V3e04pWEJmDwzheb_EN/settings'}]});
+    } else {
+      const acc = (res.acciones || []).filter(a => a && a.tipo).slice(0, 6);
+      AG.chat.push({r: 'm', t: String(res.respuesta || ''), acc, fu: res.fuentes || null, ap: res.aprendida || '', mo: res.modelo || ''});
+      if (AG.voz) agHablar(res.respuesta);
+      if (res.aprendida) AG.lecciones = null;
+    }
+  } catch (e) {
+    const c = e && e.code;
+    const t = /solo_luis/.test(errTxt(e)) ? 'El agente es solo para Luis. Entra con tu cuenta en Ajustes → Nube del equipo.'
+      : c === 'tool_error' && /Herramienta desconocida/.test(errTxt(e)) ? 'El puente de Drive todavía no tiene el agente instalado (falta publicar la versión nueva del puente).'
+      : 'No pude contestar: ' + errTxt(e);
+    AG.chat.push({r: 'm', err: true, t, acc: [{tipo: 'diagnosticar', texto: 'Revisar la app'}]});
+  }
+  AG.ocupado = false; agGuardarChat(); agPintarChat();
+}
+function agAltura(){ const t = $('#agTxt'); t.style.height = 'auto'; t.style.height = Math.min(140, t.scrollHeight + 2) + 'px'; }
+
+// ---------- lecciones ----------
+async function agPintarLecciones(forzar){
+  const box = $('#agLec');
+  if (!AG.lecciones || forzar) {
+    box.innerHTML = '<p class="note">Cargando lecciones…</p>';
+    try { AG.lecciones = (await agLlamar('agente_lecciones', {})).lecciones || []; }
+    catch (e) { box.innerHTML = '<p class="note" style="color:var(--bad)">No pude traer las lecciones: ' + esc(errTxt(e)) + '</p>'; return; }
+  }
+  box.innerHTML = AG.lecciones.length ? AG.lecciones.slice().reverse().map(l => '<div class="agLec"><div>' + esc(l.t) + '<small>' + esc(fmtD(l.f)) + '</small></div><button class="btn sm" type="button" data-olvidar="' + esc(l.id) + '">' + (AG.olvidar === l.id ? '¿Seguro? Toca otra vez' : 'Olvidar') + '</button></div>').join('')
+    : '<p class="note">Todavía no me has enseñado nada.</p>';
+}
+
+// ---------- panel ----------
+function agVista(v){
+  AG.vista = v;
+  $$('#agPanel .agSeg button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.v === v)));
+  $('#agChatV').hidden = v !== 'chat'; $('#agDiagV').hidden = v !== 'diag'; $('#agLecV').hidden = v !== 'lec';
+  if (v === 'diag' && AG.diag) agPintarDiag();
+  if (v === 'lec') agPintarLecciones(false);
+  if (v === 'chat') agPintarChat();
+}
+async function agRevisar(){
+  const b = $('#agDiagBtn'); b.disabled = true; b.textContent = 'Revisando…';
+  try { await agDiagnosticar(); agPintarDiag(); } catch (e) { toast('No se pudo revisar: ' + errTxt(e), 4200); }
+  b.disabled = false; b.textContent = 'Revisar todo';
+}
+function agAbrir(){
+  AG.abierto = true; $('#agPanel').hidden = false; $('#agBtn').hidden = true;
+  agVista(AG.vista);
+  agLlamar('agente_estado', {}).then(r => { $('#agSub').textContent = r.clave ? 'Cerebro: ' + (r.modelo || 'Gemini') + ' · ' + r.lecciones + (r.lecciones === 1 ? ' lección' : ' lecciones') : 'Falta la clave de Gemini en el puente'; }, () => { $('#agSub').textContent = 'Diagnóstico, ayuda y aprendizaje'; });
+  if (!AG.diag || Date.now() - AG.diagH > 120000) agDiagnosticar().then(() => { if (AG.vista === 'diag') agPintarDiag(); }).catch(() => {});
+}
+function agCerrar(){ AG.abierto = false; $('#agPanel').hidden = true; $('#agBtn').hidden = !agPuede(); agCallar(); }
+function initAgente(){
+  $('#agVoz').checked = AG.voz; $('#agWeb').checked = AG.web;
+  $('#agVoz').addEventListener('change', e => { AG.voz = e.target.checked; lsSet('rc_ag_voz', AG.voz); if (!AG.voz) agCallar(); });
+  $('#agWeb').addEventListener('change', e => { AG.web = e.target.checked; lsSet('rc_ag_web', AG.web); });
+  $('#agBtn').addEventListener('click', agAbrir);
+  $('#agCerrar').addEventListener('click', agCerrar);
+  $$('#agPanel .agSeg button').forEach(b => b.addEventListener('click', () => agVista(b.dataset.v)));
+  $('#agForm').addEventListener('submit', e => { e.preventDefault(); agEnviar($('#agTxt').value); });
+  $('#agTxt').addEventListener('input', agAltura);
+  $('#agTxt').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); agEnviar($('#agTxt').value); } });
+  $('#agMic').addEventListener('click', agMic);
+  $('#agNueva').addEventListener('click', e => {
+    if (!AG.chat.length) return;
+    if (!AG.nueva) { AG.nueva = true; e.target.textContent = '¿Empezar de cero? Toca otra vez'; setTimeout(() => { AG.nueva = false; e.target.textContent = 'Nueva conversación'; }, 4000); return; }
+    AG.nueva = false; e.target.textContent = 'Nueva conversación'; AG.chat = []; agGuardarChat(); agPintarChat(); agCallar();
+  });
+  $('#agLog').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.hablar != null) { const m = AG.chat[+b.dataset.hablar]; if (m) agHablar(m.t); return; }
+    const m = AG.chat[+b.dataset.m]; if (m && m.acc) agAccion(m.acc[+b.dataset.a]);
+  });
+  $('#agDiagBtn').addEventListener('click', agRevisar);
+  $('#agDiag').addEventListener('click', e => { const b = e.target.closest('[data-fix]'); if (b && AG.diag) agAccion(AG.diag.items[+b.dataset.fix].fix); });
+  $('#agDiagPreg').addEventListener('click', () => { agVista('chat'); agEnviar('Explícame el diagnóstico de la app y dime qué debo arreglar primero.'); });
+  $('#agDiagDl').addEventListener('click', () => agAccion({tipo: 'descargar_diagnostico'}));
+  $('#agLecForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const t = $('#agLecTxt').value.trim(); if (!t) return;
+    try { await agLlamar('agente_leccion', {texto: t}); $('#agLecTxt').value = ''; toast('Aprendido.'); agPintarLecciones(true); }
+    catch (x) { toast('No se pudo guardar: ' + errTxt(x), 4200); }
+  });
+  $('#agLec').addEventListener('click', async e => {
+    const b = e.target.closest('[data-olvidar]'); if (!b) return;
+    const id = b.dataset.olvidar;
+    if (AG.olvidar !== id) { AG.olvidar = id; agPintarLecciones(false); setTimeout(() => { if (AG.olvidar === id) { AG.olvidar = ''; agPintarLecciones(false); } }, 4000); return; }
+    AG.olvidar = '';
+    try { AG.lecciones = (await agLlamar('agente_olvidar', {id})).lecciones || []; agPintarLecciones(false); toast('Lección olvidada.'); }
+    catch (x) { toast('No se pudo: ' + errTxt(x), 4200); }
+  });
+  if ('speechSynthesis' in window) { try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); } catch {} }
+  // el botón aparece solo cuando la nube confirma que es Luis
+  const ver = () => { const si = agPuede(); $('#agBtn').hidden = !si || AG.abierto; if (!si && AG.abierto) agCerrar(); };
+  ver(); setInterval(ver, 3000);
+}
+
 // ---------- arranque ----------
 async function start(){
   bind();
@@ -3138,6 +3537,7 @@ async function start(){
   initExport(); initPP();
   bindDrive();
   initNotas();
+  initAgente();
   const ok = await IDB.open();
   try {
     const pls = await IDB.all('planillas'); pls.forEach(p => { p.filas = p.filas || []; p.fotos = p.fotos || {}; S.pl.set(p.id, p); });

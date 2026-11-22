@@ -423,6 +423,13 @@
       return DB;
     },
     estado: () => estado,
+    // Agente de Luis: va por el puente de Drive con la sesión de Luis (el puente comprueba que sea él).
+    async agente(tool, input) {
+      const token = (await tokenVigente()) || '';
+      if (!token) { const e = new Error('El agente es solo para Luis: inicia sesión con tu cuenta.'); e.code = 'solo_luis'; throw e; }
+      return dcallDrive(tool, Object.assign({}, input || {}, { token }));
+    },
+    hayPuente: () => !!urlPuente(),
   };
 
   // ---------- tarjeta "Nube del equipo" en Ajustes ----------
