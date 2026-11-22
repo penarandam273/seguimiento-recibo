@@ -1,0 +1,36 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.luis.recibo'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.luis.recibo'
+        minSdk 26
+        targetSdk 34
+        versionCode (System.getenv('VERSION_CODE') ?: '1') as int
+        versionName "1.0." + (System.getenv('VERSION_CODE') ?: '1')
+    }
+    signingConfigs {
+        fija {
+            storeFile file(System.getenv('LLAVE_RUTA') ?: 'no-hay-llave.p12')
+            storePassword System.getenv('CLAVE_LLAVE_APK') ?: ''
+            keyAlias 'recibo'
+            keyPassword System.getenv('CLAVE_LLAVE_APK') ?: ''
+            storeType 'pkcs12'
+        }
+    }
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled false
+            signingConfig signingConfigs.fija
+        }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    lint { checkReleaseBuilds false; abortOnError false }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+    implementation 'androidx.core:core:1.13.1'
+}

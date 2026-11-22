@@ -1,0 +1,86 @@
+# Compila la app de Android (APK) con la misma pagina adentro y la publica en "Releases".
+# La pagina web sigue funcionando igual: este flujo solo agrega la app.
+# Necesita dos secretos del repositorio (Settings → Secrets and variables → Actions):
+#   LLAVE_APK        → la llave de firma en base64 (siempre la misma: asi cada version se instala encima)
+#   CLAVE_LLAVE_APK  → la clave de esa llave
+name: App Android
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'entorno.js'
+      - 'android/**'
+      - '.github/workflows/app-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar la llave de firma
+        env:
+          LLAVE_APK: ${{ secrets.LLAVE_APK }}
+          CLAVE_LLAVE_APK: ${{ secrets.CLAVE_LLAVE_APK }}
+        run: |
+          if [ -z "$LLAVE_APK" ] || [ -z "$CLAVE_LLAVE_APK" ]; then
+            echo "::error::Faltan los secretos LLAVE_APK y CLAVE_LLAVE_APK (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+          echo "$LLAVE_APK" | base64 -d > "$RUNNER_TEMP/llave.p12"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Meter la pagina dentro de la app (funciona sin senal)
+        run: |
+          W=android/app/src/main/assets/web
+          mkdir -p "$W/lib"
+          cp index.html entorno.js "$W/"
+          # Las librerias de PDF y Excel van dentro de la app para que exporte sin internet
+          curl -sSfL -o "$W/lib/exceljs.min.js" https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js
+          curl -sSfL -o "$W/lib/jspdf.umd.min.js" https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
+          curl -sSfL -o "$W/lib/jspdf.plugin.autotable.min.js" https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js
+          sed -i \
+            -e 's#https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js#lib/exceljs.min.js#' \
+            -e 's#https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js#lib/jspdf.umd.min.js#' \
+            -e 's#https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js#lib/jspdf.plugin.autotable.min.js#' \
+            "$W/index.html"
+          grep -c "lib/jspdf" "$W/index.html"
+
+      - name: Compilar
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          LLAVE_RUTA: ${{ runner.temp }}/llave.p12
+          CLAVE_LLAVE_APK: ${{ secrets.CLAVE_LLAVE_APK }}
+        run: |
+          gradle -p android assembleRelease --no-daemon
+          cp android/app/build/outputs/apk/release/app-release.apk SeguimientoRecibo.apk
+          ls -la SeguimientoRecibo.apk
+
+      - name: Publicar la version (el boton "Descargar app" siempre baja la ultima)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="1.0.${{ github.run_number }}"
+          gh release create "app-v$V" SeguimientoRecibo.apk \
+            --title "Seguimiento de Recibo $V (Android)" \
+            --notes "Instala SeguimientoRecibo.apk en el celular. Se actualiza encima de la version anterior sin borrar nada." \
+            --latest
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SeguimientoRecibo-apk
+          path: SeguimientoRecibo.apk
