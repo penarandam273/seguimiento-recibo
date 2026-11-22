@@ -14,7 +14,7 @@ const AG_ARCHIVO = 'Agente - lecciones (no borrar).json';
 const AG_PROCESOS = 'Agente - procesos (no borrar).json';
 const AG_BIBLIO = 'Agente - biblioteca (no borrar)';
 const AG_TOPE_BIBLIO = 30000; // caracteres de biblioteca por pregunta
-const AG_REPO_BIBLIO = 'https://api.github.com/repos/penarandam273/seguimiento-recibo/contents/nube/agente-biblioteca';
+const AG_REPO_BIBLIO = 'https://raw.githubusercontent.com/penarandam273/seguimiento-recibo/main/nube/agente-biblioteca/'; // indice.txt = un archivo por línea
 const AG_API = 'https://generativelanguage.googleapis.com/v1beta/';
 const AG_RESPALDO = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
 
@@ -341,15 +341,15 @@ function agGuardarDoc(nombre, texto) {
 }
 
 function agImportarRepo() {
-  const r = UrlFetchApp.fetch(AG_REPO_BIBLIO, { headers: { Accept: 'application/vnd.github+json' }, muteHttpExceptions: true });
+  const r = UrlFetchApp.fetch(AG_REPO_BIBLIO + 'indice.txt', { muteHttpExceptions: true });
   if (r.getResponseCode() !== 200) throw new Error('GitHub respondió ' + r.getResponseCode());
   const res = { nuevas: [], actualizadas: [], iguales: 0 };
-  for (const a of JSON.parse(r.getContentText())) {
-    if (a.type !== 'file' || !/\.(md|txt)$/i.test(a.name) || !a.download_url) continue;
-    const t = UrlFetchApp.fetch(a.download_url, { muteHttpExceptions: true });
+  const nombres = r.getContentText('UTF-8').split(/\r?\n/).map((x) => x.trim()).filter((x) => /^[\w.-]+\.(md|txt)$/i.test(x) && x !== 'indice.txt');
+  for (const n of nombres) {
+    const t = UrlFetchApp.fetch(AG_REPO_BIBLIO + encodeURIComponent(n), { muteHttpExceptions: true });
     if (t.getResponseCode() !== 200) continue;
-    const e = agGuardarDoc(a.name, t.getContentText('UTF-8'));
-    if (e === 'nueva') res.nuevas.push(a.name); else if (e === 'actualizada') res.actualizadas.push(a.name); else res.iguales++;
+    const e = agGuardarDoc(n, t.getContentText('UTF-8'));
+    if (e === 'nueva') res.nuevas.push(n); else if (e === 'actualizada') res.actualizadas.push(n); else res.iguales++;
   }
   return res;
 }

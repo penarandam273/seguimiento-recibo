@@ -1,0 +1,13 @@
+dashboards.md
+estadistica.md
+excel.md
+google.md
+inventario.md
+office.md
+powerbi.md
+programacion.md
+recibo-app-procesos.md
+recibo-de-mercancia.md
+redaccion.md
+vba.md
+word.md
