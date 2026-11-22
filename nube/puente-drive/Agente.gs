@@ -6,8 +6,15 @@
 //   Configuración del proyecto → Propiedades del script → GEMINI_KEY
 // (opcional) GEMINI_MODELO = nombre exacto del modelo, si quiere fijar uno.
 // Las lecciones que aprende quedan en Drive: "Seguimiento de Recibo/Agente - lecciones (no borrar).json".
+// Los procesos que resuelve o que Luis le enseña: "Seguimiento de Recibo/Agente - procesos (no borrar).json".
+// Su biblioteca de conocimiento: carpeta "Seguimiento de Recibo/Agente - biblioteca (no borrar)" con archivos .md
+// (la primera línea "claves: a, b, c" dice cuándo usar cada uno). Para enseñarle un tema nuevo basta subir otro .md ahí.
 
 const AG_ARCHIVO = 'Agente - lecciones (no borrar).json';
+const AG_PROCESOS = 'Agente - procesos (no borrar).json';
+const AG_BIBLIO = 'Agente - biblioteca (no borrar)';
+const AG_TOPE_BIBLIO = 30000; // caracteres de biblioteca por pregunta
+const AG_REPO_BIBLIO = 'https://api.github.com/repos/penarandam273/seguimiento-recibo/contents/nube/agente-biblioteca';
 const AG_API = 'https://generativelanguage.googleapis.com/v1beta/';
 const AG_RESPALDO = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
 
@@ -39,7 +46,11 @@ const AG_SISTEMA = [
   '- Nunca pidas, muestres ni repitas contraseñas, claves de API, tokens o llaves. Si hacen falta, dile a Luis dónde ponerlas él mismo.',
   '- No inventes datos: si algo no está en el diagnóstico o en la conversación, dilo y propone cómo comprobarlo.',
   '- Tú no cambias el código de la app. Si hace falta un cambio de código, redacta el pedido exacto para que Luis se lo pase a Claude (en una acción "copiar").',
+  '- Fórmulas de Excel para que Luis las escriba en SU Excel (en español): nombres en español y separador punto y coma (=SUMAR.SI.CONJUNTO(D:D;B:B;"Norte")). Las bibliotecas las traen en inglés con coma porque son para VBA (Range.Formula): tradúcelas según para qué sea. En macros VBA: Option Explicit, .Display en vez de .Send para correos, y avisa que se guarde antes (Ctrl+Z no deshace macros).',
+  '- Usa primero tu BIBLIOTECA y tus PROCESOS GUARDADOS (abajo) cuando apliquen; si un proceso guardado ya resolvió algo igual, síguelo y dilo.',
   '- Si Luis te enseña algo o te corrige ("aprende que…", "recuerda que…", "no es así, es…"), resúmelo en una frase en el campo "leccion". Si no, deja "leccion" vacío.',
+  '',
+  '- GUARDAR PROCESOS: cada vez que en tu respuesta guíes a Luis por un procedimiento de 3 o más pasos (arreglar un error, hacer algo en Excel, Drive, la app, un informe, un trámite de recibo), o él te explique cómo se hace algo, llena "proceso" con: "titulo" corto y claro, "claves" (palabras separadas por coma con las que se buscaría) y "pasos" (lista de pasos concretos). Si es la versión mejorada de un proceso guardado, usa exactamente el mismo título para reemplazarlo. Si no hay procedimiento, deja "proceso" vacío.',
   '',
   'ACCIONES: puedes proponer botones que Luis toca para ejecutar. Tipos permitidos:',
   '  sincronizar (subir y bajar cambios de la nube), subir_drive (actualizar Google Drive ahora), subir_locales (subir planillas que solo están en este equipo),',
@@ -47,14 +58,14 @@ const AG_SISTEMA = [
   '  copiar (con "contenido": texto a copiar), abrir (con "url" https de github.com, google.com, supabase.com o aistudio.google.com), descargar_diagnostico.',
   'Propón solo las acciones que sirvan de verdad, con un "texto" corto para el botón.',
   '',
-  'Responde SOLO con un objeto JSON: {"respuesta": "...", "acciones": [{"tipo": "...", "texto": "...", "tab": "", "url": "", "contenido": ""}], "leccion": ""}',
+  'Responde SOLO con un objeto JSON: {"respuesta": "...", "acciones": [{"tipo": "...", "texto": "...", "tab": "", "url": "", "contenido": ""}], "leccion": "", "proceso": {"titulo": "", "claves": "", "pasos": []}}',
 ].join('\n');
 
 // ---------- herramientas nuevas del puente ----------
 HERRAMIENTAS.agente_estado = function (i) {
   agSoloLuis(i.token);
   const clave = agClave();
-  return { clave: !!clave, modelo: clave ? agModelos(clave)[0] : '', lecciones: agLecciones().length };
+  return { clave: !!clave, modelo: clave ? agModelos(clave)[0] : '', lecciones: agLecciones().length, procesos: agProcesos().length, biblioteca: agBiblioteca().length };
 };
 
 HERRAMIENTAS.agente = function (i) {
@@ -64,8 +75,23 @@ HERRAMIENTAS.agente = function (i) {
   const lecciones = agLecciones();
   let sistema = AG_SISTEMA;
   if (lecciones.length) sistema += '\n\nLECCIONES QUE LUIS TE HA ENSEÑADO (síguelas):\n' + lecciones.map((l) => '- ' + l.t).join('\n');
+  const msgs = Array.isArray(i.mensajes) ? i.mensajes : [];
+  const pregunta = msgs.filter((m) => m.r !== 'm').slice(-3).map((m) => String(m.t || '')).join(' ');
+  const docs = agBiblioteca();
+  if (docs.length) {
+    sistema += '\n\nTU BIBLIOTECA (temas disponibles): ' + docs.map((d) => d.nombre).join(' · ');
+    const elegidos = agElegir(pregunta, docs, (d) => d.claves.concat([d.nombre]));
+    let usado = 0;
+    for (const d of elegidos) {
+      if (usado + d.texto.length > AG_TOPE_BIBLIO) continue;
+      sistema += '\n\n=== BIBLIOTECA: ' + d.nombre + ' ===\n' + d.texto;
+      usado += d.texto.length;
+    }
+  }
+  const procs = agElegir(pregunta, agProcesos(), (p) => p.claves.concat(String(p.titulo).split(/\s+/))).slice(0, 6);
+  if (procs.length) sistema += '\n\nPROCESOS QUE YA GUARDASTE Y SIRVEN AQUÍ:\n' + procs.map((p) => '## ' + p.titulo + ' (' + p.f + ')\n' + p.pasos.map((x, n) => (n + 1) + '. ' + x).join('\n')).join('\n\n');
   if (i.contexto) sistema += '\n\nDIAGNÓSTICO ACTUAL DE LA APP EN EL EQUIPO DE LUIS (' + new Date().toISOString() + '):\n' + String(JSON.stringify(i.contexto)).slice(0, 12000);
-  const contents = (Array.isArray(i.mensajes) ? i.mensajes : []).slice(-20)
+  const contents = msgs.slice(-20)
     .map((m) => ({ role: m.r === 'm' ? 'model' : 'user', parts: [{ text: String(m.t || '').slice(0, 6000) }] }))
     .filter((m) => m.parts[0].text);
   if (!contents.length || contents[contents.length - 1].role !== 'user') throw new Error('Falta la pregunta');
@@ -85,6 +111,7 @@ HERRAMIENTAS.agente = function (i) {
         acciones: { type: 'ARRAY', items: { type: 'OBJECT', properties: {
           tipo: { type: 'STRING' }, texto: { type: 'STRING' }, tab: { type: 'STRING' }, url: { type: 'STRING' }, contenido: { type: 'STRING' } }, required: ['tipo', 'texto'] } },
         leccion: { type: 'STRING' },
+        proceso: { type: 'OBJECT', properties: { titulo: { type: 'STRING' }, claves: { type: 'STRING' }, pasos: { type: 'ARRAY', items: { type: 'STRING' } } } },
       },
       required: ['respuesta'],
     };
@@ -108,6 +135,11 @@ HERRAMIENTAS.agente = function (i) {
     if (g && g.groundingChunks) out.fuentes = g.groundingChunks.map((c) => c.web).filter(Boolean).slice(0, 6).map((w) => ({ t: w.title || w.uri, u: w.uri }));
     const lec = String(out.leccion || '').trim();
     if (lec) { agGuardar(agLecciones().concat([{ id: Utilities.getUuid().slice(0, 8), t: lec.slice(0, 400), f: new Date().toISOString().slice(0, 10) }])); out.aprendida = lec; }
+    const pr = out.proceso;
+    if (pr && String(pr.titulo || '').trim() && Array.isArray(pr.pasos) && pr.pasos.filter(Boolean).length >= 2) {
+      out.procesoGuardado = agGuardarProceso(pr).titulo;
+    }
+    delete out.proceso;
     return out;
   }
   if (ultimo === 'cupo') return { respuesta: 'Se acabó por ahora el cupo gratis de Gemini. Espera un minuto (o hasta mañana si es el cupo del día) y vuelve a preguntar.', acciones: [], cupo: true };
@@ -164,6 +196,48 @@ HERRAMIENTAS.agente_drive = function (i) {
     }
   }
   return out;
+};
+
+// Procesos guardados (los que el agente resolvió o Luis le enseñó).
+HERRAMIENTAS.agente_procesos = function (i) { agSoloLuis(i.token); return { procesos: agProcesos() }; };
+
+HERRAMIENTAS.agente_proceso_guardar = function (i) {
+  agSoloLuis(i.token);
+  const pasos = (Array.isArray(i.pasos) ? i.pasos : String(i.pasos || '').split('\n')).map((x) => String(x).trim()).filter(Boolean);
+  if (!String(i.titulo || '').trim() || !pasos.length) throw new Error('Falta el título o los pasos');
+  return { ok: true, proceso: agGuardarProceso({ titulo: i.titulo, claves: i.claves, pasos }) };
+};
+
+// Solo cuando Luis toca "Olvidar" en un proceso y lo confirma.
+HERRAMIENTAS.agente_olvidar_proceso = function (i) {
+  agSoloLuis(i.token);
+  const antes = agProcesos();
+  const despues = antes.filter((p) => p.id !== String(i.id || ''));
+  if (despues.length !== antes.length) agEscribirJson(AG_PROCESOS, despues);
+  return { ok: true, procesos: despues };
+};
+
+// Biblioteca: lista de temas y subir uno nuevo (si ya existe, la versión anterior se guarda en "anteriores").
+HERRAMIENTAS.agente_biblioteca = function (i) {
+  agSoloLuis(i.token);
+  return { carpeta: agCarpetaBiblio().getUrl(), temas: agBiblioteca().map((d) => ({ nombre: d.nombre, claves: d.claves.slice(0, 12), kb: Math.round(d.texto.length / 1024 * 10) / 10 })) };
+};
+
+// Trae del repositorio las bibliotecas nuevas o cambiadas (las versiones viejas van a "anteriores", nada se borra).
+HERRAMIENTAS.agente_biblioteca_actualizar = function (i) {
+  agSoloLuis(i.token);
+  return agImportarRepo();
+};
+
+HERRAMIENTAS.agente_biblioteca_guardar = function (i) {
+  agSoloLuis(i.token);
+  let nombre = String(i.nombre || '').replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 80);
+  const texto = String(i.texto || '');
+  if (!nombre || !texto.trim()) throw new Error('Falta el nombre o el texto');
+  if (texto.length > 200000) throw new Error('El documento es muy grande (máximo 200 mil caracteres)');
+  if (!/\.(md|txt)$/i.test(nombre)) nombre += '.md';
+  agGuardarDoc(nombre, texto);
+  return { ok: true, nombre };
 };
 
 // ---------- ayudantes ----------
@@ -237,4 +311,115 @@ function agGuardar(lista) {
   const a = agArchivo();
   if (a) a.setContent(txt);
   else DriveApp.getFolderById(RAIZ).createFile(AG_ARCHIVO, txt, 'application/json');
+}
+
+// ---------- biblioteca y procesos ----------
+function agCarpetaBiblio() {
+  const raiz = DriveApp.getFolderById(RAIZ);
+  const it = raiz.getFoldersByName(AG_BIBLIO);
+  return it.hasNext() ? it.next() : raiz.createFolder(AG_BIBLIO);
+}
+
+// Guarda un documento en la biblioteca; si ya había uno con ese nombre y es distinto, el viejo pasa a "anteriores".
+function agGuardarDoc(nombre, texto) {
+  const carpeta = agCarpetaBiblio();
+  const viejos = carpeta.getFilesByName(nombre);
+  if (viejos.hasNext()) {
+    const v = viejos.next();
+    if (v.getBlob().getDataAsString('UTF-8') === texto) return 'igual';
+    const it = carpeta.getFoldersByName('anteriores');
+    const ant = it.hasNext() ? it.next() : carpeta.createFolder('anteriores');
+    v.moveTo(ant);
+    v.setName(nombre.replace(/(\.\w+)$/, ' (' + new Date().toISOString().slice(0, 10) + ')$1'));
+    carpeta.createFile(nombre, texto, 'text/markdown');
+    CacheService.getScriptCache().remove('ag_bib');
+    return 'actualizada';
+  }
+  carpeta.createFile(nombre, texto, 'text/markdown');
+  CacheService.getScriptCache().remove('ag_bib');
+  return 'nueva';
+}
+
+function agImportarRepo() {
+  const r = UrlFetchApp.fetch(AG_REPO_BIBLIO, { headers: { Accept: 'application/vnd.github+json' }, muteHttpExceptions: true });
+  if (r.getResponseCode() !== 200) throw new Error('GitHub respondió ' + r.getResponseCode());
+  const res = { nuevas: [], actualizadas: [], iguales: 0 };
+  for (const a of JSON.parse(r.getContentText())) {
+    if (a.type !== 'file' || !/\.(md|txt)$/i.test(a.name) || !a.download_url) continue;
+    const t = UrlFetchApp.fetch(a.download_url, { muteHttpExceptions: true });
+    if (t.getResponseCode() !== 200) continue;
+    const e = agGuardarDoc(a.name, t.getContentText('UTF-8'));
+    if (e === 'nueva') res.nuevas.push(a.name); else if (e === 'actualizada') res.actualizadas.push(a.name); else res.iguales++;
+  }
+  return res;
+}
+
+// Todos los .md/.txt de la biblioteca: { nombre, claves[], texto } (se recuerdan 10 minutos).
+function agBiblioteca() {
+  const cache = CacheService.getScriptCache();
+  const g = cache.get('ag_bib');
+  if (g) { try { return JSON.parse(g); } catch (x) { /* se vuelve a leer */ } }
+  const docs = [];
+  const carpeta = agCarpetaBiblio();
+  if (!carpeta.getFiles().hasNext()) { try { agImportarRepo(); } catch (x) { /* sin GitHub por ahora */ } }
+  const fs = carpeta.getFiles();
+  while (fs.hasNext()) {
+    const f = fs.next();
+    const n = f.getName();
+    if (!/\.(md|txt)$/i.test(n) && !/^text\//.test(f.getMimeType())) continue;
+    let texto = '';
+    try { texto = f.getBlob().getDataAsString('UTF-8'); } catch (x) { continue; }
+    let claves = [];
+    const m = texto.match(/^\s*claves\s*:\s*(.+)$/im);
+    if (m) { claves = m[1].split(',').map((c) => c.trim()).filter(Boolean); texto = texto.replace(m[0], '').trim(); }
+    docs.push({ nombre: n.replace(/\.(md|txt)$/i, ''), claves, texto: texto.slice(0, 60000) });
+  }
+  docs.sort((a, b) => a.nombre.localeCompare(b.nombre));
+  try { const j = JSON.stringify(docs); if (j.length < 95000) cache.put('ag_bib', j, 600); } catch (x) { /* muy grande para la caché */ }
+  return docs;
+}
+
+function agNorm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+
+// Ordena por cuántas claves aparecen en la pregunta; solo devuelve los que tengan al menos una.
+function agElegir(pregunta, lista, clavesDe) {
+  const q = ' ' + agNorm(pregunta).replace(/[^a-z0-9ñ]+/g, ' ') + ' ';
+  return lista.map((x) => {
+    let p = 0;
+    for (const c of clavesDe(x)) {
+      const k = agNorm(c).replace(/[^a-z0-9ñ]+/g, ' ').trim();
+      if (k.length < 3) continue;
+      if (q.indexOf(' ' + k + ' ') >= 0) p += 2;
+      else if (k.length >= 5 && q.indexOf(' ' + k) >= 0) p += 1; // plural o palabra más larga
+    }
+    return { x, p };
+  }).filter((o) => o.p > 0).sort((a, b) => b.p - a.p).map((o) => o.x);
+}
+
+function agProcesos() { const l = agLeerJson(AG_PROCESOS); return l.map((p) => Object.assign({ claves: [], pasos: [] }, p)); }
+
+function agGuardarProceso(pr) {
+  const titulo = String(pr.titulo).trim().slice(0, 120);
+  const claves = (Array.isArray(pr.claves) ? pr.claves : String(pr.claves || '').split(',')).map((c) => String(c).trim()).filter(Boolean).slice(0, 20);
+  const pasos = pr.pasos.map((x) => String(x).trim()).filter(Boolean).slice(0, 40).map((x) => x.slice(0, 500));
+  const lista = agProcesos();
+  const igual = lista.find((p) => agNorm(p.titulo) === agNorm(titulo));
+  const hoy = new Date().toISOString().slice(0, 10);
+  let p;
+  if (igual) { igual.claves = claves.length ? claves : igual.claves; igual.pasos = pasos; igual.f = hoy; igual.veces = (igual.veces || 1) + 1; p = igual; }
+  else { p = { id: Utilities.getUuid().slice(0, 8), titulo, claves, pasos, f: hoy, veces: 1 }; lista.push(p); }
+  agEscribirJson(AG_PROCESOS, lista.slice(-300));
+  return p;
+}
+
+function agLeerJson(nombre) {
+  const it = DriveApp.getFolderById(RAIZ).getFilesByName(nombre);
+  if (!it.hasNext()) return [];
+  try { const l = JSON.parse(it.next().getBlob().getDataAsString('UTF-8')); return Array.isArray(l) ? l : []; } catch (x) { return []; }
+}
+function agEscribirJson(nombre, lista) {
+  const txt = JSON.stringify(lista, null, 1);
+  const it = DriveApp.getFolderById(RAIZ).getFilesByName(nombre);
+  if (it.hasNext()) it.next().setContent(txt);
+  else DriveApp.getFolderById(RAIZ).createFile(nombre, txt, 'application/json');
 }

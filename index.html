@@ -351,6 +351,14 @@ details>div{display:flex;flex-direction:column;gap:10px;margin-top:8px}
 .agLecForm{display:flex;gap:6px}
 .agLecForm input{flex:1;border:1px solid var(--line-2);border-radius:8px;padding:9px 10px;font:inherit;background:var(--surface);color:var(--ink)}
 .agPasos{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.agH3{font-family:var(--f-head);font-size:17px;margin:10px 0 0;padding-top:8px;border-top:1px solid var(--line)}
+.agH3:first-child{border-top:0;margin-top:0;padding-top:0}
+.agProc{border-bottom:1px solid var(--line);padding:6px 0}
+.agProc summary{cursor:pointer;font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.agProc summary small{color:var(--muted);font-weight:400;font-size:12px}
+.agProc ol{margin:6px 0;padding-left:22px;font-size:13.5px;display:flex;flex-direction:column;gap:3px}
+.agBibIt{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.agBibIt small{color:var(--muted)}
 </style>
 
 <header class="top">
@@ -683,7 +691,7 @@ details>div{display:flex;flex-direction:column;gap:10px;margin-top:8px}
   <div class="agSeg" role="tablist" aria-label="Secciones del agente">
     <button type="button" role="tab" data-v="chat" aria-selected="true">Conversar</button>
     <button type="button" role="tab" data-v="diag" aria-selected="false">Diagnóstico</button>
-    <button type="button" role="tab" data-v="lec" aria-selected="false">Lecciones</button>
+    <button type="button" role="tab" data-v="lec" aria-selected="false">Aprende</button>
   </div>
   <div class="agBody" id="agChatV">
     <div class="agLog" id="agLog" aria-live="polite"></div>
@@ -707,9 +715,21 @@ details>div{display:flex;flex-direction:column;gap:10px;margin-top:8px}
     <div id="agDiag"><p class="note">Toca «Revisar todo» para revisar la nube, el puente de Drive, lo pendiente y los errores de este equipo.</p></div>
   </div>
   <div class="agBody" id="agLecV" hidden>
-    <p class="note">Lo que le enseñes queda guardado en tu Drive y el agente lo sigue en cada respuesta. También aprende solo cuando lo corriges.</p>
+    <h3 class="agH3">Lecciones</h3>
+    <p class="note">Lo que le enseñes queda en tu Drive y lo sigue en cada respuesta. También aprende solo cuando lo corriges.</p>
     <form class="agLecForm" id="agLecForm"><input id="agLecTxt" placeholder="Ej.: Edwin trabaja en el turno de la tarde" aria-label="Lección nueva"><button class="btn sm primary" type="submit">Enseñar</button></form>
     <div id="agLec"></div>
+    <h3 class="agH3">Procesos guardados</h3>
+    <p class="note">Cada procedimiento que te explica o que tú le enseñas queda guardado paso a paso, y lo vuelve a usar cuando haga falta. Para guardar uno a propósito dile: «guarda este proceso».</p>
+    <div id="agProc"></div>
+    <h3 class="agH3">Biblioteca</h3>
+    <p class="note">Documentos de conocimiento (.md o .txt). Usa el que corresponde a cada pregunta.</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn sm" id="agBibSubir" type="button">Agregar documento</button>
+      <button class="btn sm" id="agBibTraer" type="button">Traer bibliotecas nuevas</button>
+      <input type="file" id="agBibArch" class="vh" accept=".md,.txt,text/markdown,text/plain" multiple tabindex="-1">
+    </div>
+    <div id="agBib"></div>
   </div>
 </div>
 
@@ -3221,7 +3241,7 @@ function agLog(tipo, txt){
 window.addEventListener('error', e => agLog('error', (e.message || 'Error') + (e.filename ? ' @' + String(e.filename).split('/').pop() + ':' + e.lineno : '')));
 window.addEventListener('unhandledrejection', e => agLog('promesa', errTxt(e.reason)));
 const AG = {abierto: false, vista: 'chat', chat: lsGet('rc_ag_chat', []), voz: lsGet('rc_ag_voz', true), web: lsGet('rc_ag_web', false),
-  diag: null, diagH: 0, ocupado: false, lecciones: null, rec: null, escuchando: false, olvidar: '', nueva: false};
+  diag: null, diagH: 0, ocupado: false, lecciones: null, procesos: null, biblio: null, olvidarP: '', rec: null, escuchando: false, olvidar: '', nueva: false};
 const AG_TABS = ['registro', 'tablero', 'imprimir', 'ajustes'];
 const agPuede = () => !!quienEsta().luis && !!(window.entorno && window.entorno.agente);
 const agLlamar = (tool, input) => window.entorno.agente(tool, input || {});
@@ -3403,13 +3423,14 @@ function agGuardarChat(){ lsSet('rc_ag_chat', AG.chat.slice(-40)); }
 function agPintarChat(){
   const log = $('#agLog');
   if (!AG.chat.length) {
-    log.innerHTML = '<div class="agMsg m"><p>Hola, Luis. Soy tu agente de Recibo. Puedo revisar la app y arreglar lo que falle, y ayudarte con Excel, correos, informes, logística de recibo, programación, Google, Android y el proyecto.</p><p>Escríbeme o toca 🎤 y háblame.</p></div>';
+    log.innerHTML = '<div class="agMsg m"><p>Hola, Luis. Soy tu agente de Recibo. Puedo revisar la app y arreglar lo que falle, y ayudarte con Excel, dashboards, estadística, Power BI, VBA, Word, correos, informes, inventarios y recibo de mercancía, programación, Google, Android y el proyecto. Cada proceso que resolvamos lo guardo para la próxima vez.</p><p>Escríbeme o toca 🎤 y háblame.</p></div>';
   } else {
     log.innerHTML = AG.chat.map((m, i) => {
       if (m.r === 'u') return '<div class="agMsg u">' + agMd(m.t) + '</div>';
       let h = '<div class="agMsg m' + (m.err ? ' err' : '') + '">' + agMd(m.t);
       if (m.acc && m.acc.length) h += '<div class="agAcc">' + m.acc.map((a, j) => '<button class="btn sm" type="button" data-m="' + i + '" data-a="' + j + '">' + esc(a.texto || a.tipo) + '</button>').join('') + '</div>';
       if (m.ap) h += '<div class="agAprendi">✓ Aprendí: ' + esc(m.ap) + '</div>';
+      if (m.pg) h += '<div class="agAprendi">📘 Guardé el proceso: ' + esc(m.pg) + '</div>';
       const meta = [];
       if (m.fu && m.fu.length) meta.push('Fuentes: ' + m.fu.map(f => '<a href="' + esc(f.u) + '" target="_blank" rel="noopener">' + esc(String(f.t).slice(0, 40)) + '</a>').join(' · '));
       if (!m.err) meta.push('<button type="button" data-hablar="' + i + '">🔊 Escuchar</button>');
@@ -3436,9 +3457,11 @@ async function agEnviar(texto){
         acc: [{tipo: 'abrir', texto: 'Abrir AI Studio', url: 'https://aistudio.google.com/apikey'}, {tipo: 'abrir', texto: 'Abrir el puente', url: 'https://script.google.com/home/projects/1HjsqjsL1VzgtJSfrFei5ZiTTBWvsaeWZ-pKU5V3e04pWEJmDwzheb_EN/settings'}]});
     } else {
       const acc = (res.acciones || []).filter(a => a && a.tipo).slice(0, 6);
-      AG.chat.push({r: 'm', t: String(res.respuesta || ''), acc, fu: res.fuentes || null, ap: res.aprendida || '', mo: res.modelo || ''});
+      AG.chat.push({r: 'm', t: String(res.respuesta || ''), acc, fu: res.fuentes || null, ap: res.aprendida || '', pg: res.procesoGuardado || '', mo: res.modelo || ''});
+      if (res.procesoGuardado) AG.procesos = null;
       if (AG.voz) agHablar(res.respuesta);
       if (res.aprendida) AG.lecciones = null;
+      if (res.procesoGuardado || res.aprendida) agSub();
     }
   } catch (e) {
     const c = e && e.code;
@@ -3463,13 +3486,42 @@ async function agPintarLecciones(forzar){
     : '<p class="note">Todavía no me has enseñado nada.</p>';
 }
 
+async function agPintarProcesos(forzar){
+  const box = $('#agProc');
+  if (!AG.procesos || forzar) {
+    box.innerHTML = '<p class="note">Cargando procesos…</p>';
+    try { AG.procesos = (await agLlamar('agente_procesos', {})).procesos || []; }
+    catch (e) { box.innerHTML = '<p class="note" style="color:var(--bad)">No pude traer los procesos: ' + esc(errTxt(e)) + '</p>'; return; }
+  }
+  box.innerHTML = AG.procesos.length ? AG.procesos.slice().reverse().map(p => '<details class="agProc"><summary><span>' + esc(p.titulo) + '</span><small>' + esc(fmtD(p.f)) + (p.veces > 1 ? ' · usado ' + p.veces + ' veces' : '') + '</small></summary><ol>' +
+    (p.pasos || []).map(x => '<li>' + esc(x) + '</li>').join('') + '</ol><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" type="button" data-pcopiar="' + esc(p.id) + '">Copiar</button><button class="btn sm" type="button" data-polvidar="' + esc(p.id) + '">' + (AG.olvidarP === p.id ? '¿Seguro? Toca otra vez' : 'Olvidar') + '</button></div></details>').join('')
+    : '<p class="note">Todavía no hay procesos guardados.</p>';
+}
+async function agPintarBiblio(forzar){
+  const box = $('#agBib');
+  if (!AG.biblio || forzar) {
+    box.innerHTML = '<p class="note">Cargando biblioteca…</p>';
+    try { AG.biblio = await agLlamar('agente_biblioteca', {}); }
+    catch (e) { box.innerHTML = '<p class="note" style="color:var(--bad)">No pude traer la biblioteca: ' + esc(errTxt(e)) + '</p>'; return; }
+  }
+  const t = AG.biblio.temas || [];
+  box.innerHTML = (t.length ? t.map(d => '<div class="agBibIt"><span><b>' + esc(d.nombre) + '</b><br><small>' + esc(d.claves.slice(0, 8).join(', ')) + '</small></span><small>' + d.kb + ' KB</small></div>').join('') : '<p class="note">La biblioteca está vacía.</p>') +
+    (AG.biblio.carpeta ? '<p class="note" style="margin-top:6px"><a href="' + esc(AG.biblio.carpeta) + '" target="_blank" rel="noopener">Abrir la carpeta en Drive</a></p>' : '');
+}
+function agSub(){
+  agLlamar('agente_estado', {}).then(r => {
+    $('#agSub').textContent = r.clave ? 'Cerebro: ' + (r.modelo || 'Gemini') + ' · ' + r.lecciones + (r.lecciones === 1 ? ' lección' : ' lecciones') + ' · ' + (r.procesos || 0) + ' procesos · ' + (r.biblioteca || 0) + ' temas'
+      : 'Falta la clave de Gemini en el puente · ' + (r.biblioteca || 0) + ' temas en la biblioteca';
+  }, () => { $('#agSub').textContent = 'Diagnóstico, ayuda y aprendizaje'; });
+}
+
 // ---------- panel ----------
 function agVista(v){
   AG.vista = v;
   $$('#agPanel .agSeg button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.v === v)));
   $('#agChatV').hidden = v !== 'chat'; $('#agDiagV').hidden = v !== 'diag'; $('#agLecV').hidden = v !== 'lec';
   if (v === 'diag' && AG.diag) agPintarDiag();
-  if (v === 'lec') agPintarLecciones(false);
+  if (v === 'lec') { agPintarLecciones(false); agPintarProcesos(false); agPintarBiblio(false); }
   if (v === 'chat') agPintarChat();
 }
 async function agRevisar(){
@@ -3480,7 +3532,7 @@ async function agRevisar(){
 function agAbrir(){
   AG.abierto = true; $('#agPanel').hidden = false; $('#agBtn').hidden = true;
   agVista(AG.vista);
-  agLlamar('agente_estado', {}).then(r => { $('#agSub').textContent = r.clave ? 'Cerebro: ' + (r.modelo || 'Gemini') + ' · ' + r.lecciones + (r.lecciones === 1 ? ' lección' : ' lecciones') : 'Falta la clave de Gemini en el puente'; }, () => { $('#agSub').textContent = 'Diagnóstico, ayuda y aprendizaje'; });
+  agSub();
   if (!AG.diag || Date.now() - AG.diagH > 120000) agDiagnosticar().then(() => { if (AG.vista === 'diag') agPintarDiag(); }).catch(() => {});
 }
 function agCerrar(){ AG.abierto = false; $('#agPanel').hidden = true; $('#agBtn').hidden = !agPuede(); agCallar(); }
@@ -3522,6 +3574,32 @@ function initAgente(){
     AG.olvidar = '';
     try { AG.lecciones = (await agLlamar('agente_olvidar', {id})).lecciones || []; agPintarLecciones(false); toast('Lección olvidada.'); }
     catch (x) { toast('No se pudo: ' + errTxt(x), 4200); }
+  });
+  $('#agProc').addEventListener('click', async e => {
+    const c = e.target.closest('[data-pcopiar]');
+    if (c) { const p = (AG.procesos || []).find(x => x.id === c.dataset.pcopiar); if (p) agAccion({tipo: 'copiar', contenido: p.titulo + '\n' + p.pasos.map((x, n) => (n + 1) + '. ' + x).join('\n')}); return; }
+    const b = e.target.closest('[data-polvidar]'); if (!b) return;
+    const id = b.dataset.polvidar;
+    if (AG.olvidarP !== id) { AG.olvidarP = id; agPintarProcesos(false); setTimeout(() => { if (AG.olvidarP === id) { AG.olvidarP = ''; agPintarProcesos(false); } }, 4000); return; }
+    AG.olvidarP = '';
+    try { AG.procesos = (await agLlamar('agente_olvidar_proceso', {id})).procesos || []; agPintarProcesos(false); toast('Proceso olvidado.'); agSub(); }
+    catch (x) { toast('No se pudo: ' + errTxt(x), 4200); }
+  });
+  $('#agBibSubir').addEventListener('click', () => $('#agBibArch').click());
+  $('#agBibArch').addEventListener('change', async e => {
+    const fs = [...e.target.files]; e.target.value = '';
+    for (const f of fs) {
+      if (f.size > 200000) { toast(f.name + ' es muy grande (máximo 200 KB).', 4200); continue; }
+      try { await agLlamar('agente_biblioteca_guardar', {nombre: f.name, texto: await f.text()}); toast('Aprendido: ' + f.name); }
+      catch (x) { toast('No se pudo subir ' + f.name + ': ' + errTxt(x), 4200); }
+    }
+    agPintarBiblio(true); agSub();
+  });
+  $('#agBibTraer').addEventListener('click', async e => {
+    const b = e.target; b.disabled = true; b.textContent = 'Trayendo…';
+    try { const r = await agLlamar('agente_biblioteca_actualizar', {}); toast((r.nuevas || []).length + ' nuevas · ' + (r.actualizadas || []).length + ' actualizadas · ' + (r.iguales || 0) + ' iguales.', 4200); agPintarBiblio(true); agSub(); }
+    catch (x) { toast('No se pudo: ' + errTxt(x), 4200); }
+    b.disabled = false; b.textContent = 'Traer bibliotecas nuevas';
   });
   if ('speechSynthesis' in window) { try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); } catch {} }
   // el botón aparece solo cuando la nube confirma que es Luis
