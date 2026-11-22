@@ -53,6 +53,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .brand p{margin:0;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand>div{min-width:0}
 .chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
+a.chip{text-decoration:none;color:var(--ink)}
 .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--na)}
 .chip[data-s="ok"] .dot{background:var(--ok)}
 .chip[data-s="pend"] .dot,.chip[data-s="off"] .dot{background:var(--warn)}
@@ -2046,7 +2047,7 @@ async function pdfPlanilla(pl, conEvid, docIn){   // docIn: true = devuelve el d
     CRIT.flatMap(c => [c.a, c.b])
   ];
   const body = rows.map(f => f ? [fmtDs(f.fecha), f.operador || '', f.proveedor || '', f.etiqueta || '', f.sap || '', descDe(f), ...CRIT.flatMap(c => marcas(f[c.k])), f.obs || '', refs.get(f.id) || ''] : Array(20).fill(''));
-  const cs = {0:{cellWidth:14}, 1:{cellWidth:20}, 2:{cellWidth:26}, 3:{cellWidth:24, font:'courier'}, 4:{cellWidth:12}, 5:{cellWidth:28}, 18:{cellWidth:30}, 19:{cellWidth:8, halign:'center'}};
+  const cs = {0:{cellWidth:14}, 1:{cellWidth:20}, 2:{cellWidth:26}, 3:{cellWidth:24, font:'courier'}, 4:{cellWidth:12}, 5:{cellWidth:28}, 18:{cellWidth:'auto'}, 19:{cellWidth:8, halign:'center'}};   // Observaciones toma el ancho que sobra de la hoja
   for (let i = 6; i < 18; i++) cs[i] = {cellWidth:8.4, halign:'center', fontStyle:'bold'};
   const encabezado = () => {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(17);

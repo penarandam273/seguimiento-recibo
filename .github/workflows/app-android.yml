@@ -92,10 +92,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           V="1.0.${{ github.run_number }}"
-          gh release create "app-v$V" SeguimientoRecibo.apk \
-            --title "Seguimiento de Recibo $V (Android)" \
-            --notes "Instala SeguimientoRecibo.apk en el celular. Se actualiza encima de la version anterior sin borrar nada." \
-            --latest
+          # Si se vuelve a correr la misma compilacion, la version ya existe: se reemplaza el APK en vez de fallar
+          if gh release view "app-v$V" >/dev/null 2>&1; then
+            gh release upload "app-v$V" SeguimientoRecibo.apk --clobber
+            echo "La version app-v$V ya existia: se reemplazo su APK."
+          else
+            gh release create "app-v$V" SeguimientoRecibo.apk \
+              --title "Seguimiento de Recibo $V (Android)" \
+              --notes "Instala SeguimientoRecibo.apk en el celular. Se actualiza encima de la version anterior sin borrar nada." \
+              --latest
+          fi
 
       - uses: actions/upload-artifact@v4
         with:

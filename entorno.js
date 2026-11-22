@@ -552,6 +552,7 @@
       try {
         const r = await llamar('crear_codigo');
         estado = await revisarEstado();
+        await pintarTarjeta();   // así aparece «Quitar código general» sin recargar
         mostrarInvitacion('nbMsg', r.codigo, '');
       } catch (err) { aviso(err.message); }
     });
