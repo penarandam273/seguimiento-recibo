@@ -290,6 +290,13 @@
   const DESCARGAS = {
     async save({ filename, data }) {
       const blob = data instanceof Blob ? data : new Blob([data]);
+      // En la app de Android el archivo se guarda en Descargas del teléfono y se abre solo.
+      if (window.ReciboApp && typeof window.ReciboApp.guardar === 'function') {
+        const tipo = blob.type || (/\.pdf$/i.test(filename || '') ? 'application/pdf' : /\.xlsx$/i.test(filename || '') ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/octet-stream');
+        const r = window.ReciboApp.guardar(filename || 'archivo', await blobABase64(blob), tipo);
+        if (r !== 'ok') throw { code: 'tool_error', message: r || 'No se pudo guardar' };
+        return { ok: true };
+      }
       const u = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = u; a.download = filename || 'archivo'; a.rel = 'noopener';
@@ -470,7 +477,10 @@
 
     const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
     on('nbUsarCodigo', async () => {
-      const c = document.getElementById('nbCodigo').value.trim().toUpperCase();
+      // Se puede pegar el código solo o el enlace completo de la invitación (…#equipo=XXXXX-XXXXX).
+      const escrito = document.getElementById('nbCodigo').value.trim();
+      const enLink = decodeURIComponent(escrito).match(/#equipo=([A-Za-z0-9-]{8,20})/);
+      const c = (enLink ? enLink[1] : escrito).toUpperCase();
       if (c.replace(/[^A-Z0-9]/g, '').length < 8) { aviso('Escribe el código completo (10 letras y números).'); return; }
       ls.set('equipo', c); aviso('Comprobando…');
       const r = await revisarEstado();

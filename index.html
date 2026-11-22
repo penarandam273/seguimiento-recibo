@@ -315,7 +315,10 @@ details>div{display:flex;flex-direction:column;gap:10px;margin-top:8px}
       <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v3H9z"/><path d="m9 13 2 2 4-4"/></svg></div>
       <div><h1>Seguimiento de Recibo</h1><p id="subSede">Conferencias, evidencias y tablero</p></div>
     </div>
-    <button class="chip" id="syncChip" data-s="ok" title="Estado de sincronización"><span class="dot"></span><span id="syncTxt">Cargando…</span></button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+      <a class="chip" id="appBtn" href="https://github.com/penarandam273/seguimiento-recibo/releases/latest/download/SeguimientoRecibo.apk" title="Instalar Seguimiento de Recibo en el celular (Android)" hidden><span aria-hidden="true">📲</span><span>Descargar app</span></a>
+      <button class="chip" id="syncChip" data-s="ok" title="Estado de sincronización"><span class="dot"></span><span id="syncTxt">Cargando…</span></button>
+    </div>
   </div>
   <nav class="wrap tabs" role="tablist" aria-label="Secciones">
     <button class="tab" role="tab" data-tab="registro" aria-selected="true">Registro</button>
@@ -324,6 +327,7 @@ details>div{display:flex;flex-direction:column;gap:10px;margin-top:8px}
     <button class="tab" role="tab" data-tab="ajustes" aria-selected="false">Ajustes</button>
   </nav>
 </header>
+<script>if (!window.ReciboApp) document.getElementById('appBtn').hidden = false;</script>
 
 <main class="wrap">
   <!-- REGISTRO -->
@@ -1131,9 +1135,9 @@ async function sync(){
         if (S.assets) {
           const r = await S.assets.upload(f.blob, {type:'image/jpeg', fecha: pl.fecha}); remote = {r:'a', id:r.id};
         } else {
-          const u = URL.createObjectURL(f.blob); let d;
-          try { d = await drawScaled(u, 1000, 0.6, false); if (d.data.length > 240000) d = await drawScaled(u, 760, 0.5, false); } finally { URL.revokeObjectURL(u); }
-          await S.db.doc('fotos/' + f.id).set({pid: f.pid, data: d.data}); remote = {r:'d', id:f.id};
+          // Sin puente de Drive la foto NO se guarda dentro de la nube (la llenaría y bloquearía la cuenta):
+          // se queda en este equipo y se sube a Drive apenas el puente responda.
+          fallo = 'Las fotos esperan a Google Drive; se suben solas cuando el puente responda.'; break;
         }
       } catch (e) { fallo = 'No se pudo subir una foto (' + errTxt(e) + ').'; if (e && (e.code === 'rate_limited' || e.code === 'quota_or_state' || e.code === 'quota_exceeded')) break; continue; }
       f.remote = remote; try { await IDB.put('fotos', f); } catch {}
