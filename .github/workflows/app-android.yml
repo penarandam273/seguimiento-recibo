@@ -34,6 +34,12 @@ jobs:
             exit 1
           fi
           F="$RUNNER_TEMP/llave.p12"
+          # si los dos secretos quedaron cambiados de lugar (la llave es el texto largo), se acomodan solos
+          if [ "$(printf '%s' "$LLAVE_APK" | wc -c)" -lt "$(printf '%s' "$CLAVE_LLAVE_APK" | wc -c)" ]; then
+            echo "Los secretos estaban cambiados de lugar: se usan al revés."
+            T="$LLAVE_APK"; LLAVE_APK="$CLAVE_LLAVE_APK"; CLAVE_LLAVE_APK="$T"
+          fi
+          echo "CLAVE_LLAVE_APK=$CLAVE_LLAVE_APK" >> "$GITHUB_ENV"
           # se limpian espacios y saltos de línea que a veces quedan al pegar
           printf '%s' "$LLAVE_APK" | tr -d ' \r\n\t' | base64 -d > "$F" 2>/dev/null || true
           echo "Largo del secreto LLAVE_APK: $(printf '%s' "$LLAVE_APK" | tr -d ' \r\n\t' | wc -c) caracteres (debe ser 3552) · largo de CLAVE_LLAVE_APK: $(printf '%s' "$CLAVE_LLAVE_APK" | wc -c) (debe ser 36)"
@@ -76,7 +82,6 @@ jobs:
         env:
           VERSION_CODE: ${{ github.run_number }}
           LLAVE_RUTA: ${{ runner.temp }}/llave.p12
-          CLAVE_LLAVE_APK: ${{ secrets.CLAVE_LLAVE_APK }}
         run: |
           gradle -p android assembleRelease --no-daemon
           cp android/app/build/outputs/apk/release/app-release.apk SeguimientoRecibo.apk
