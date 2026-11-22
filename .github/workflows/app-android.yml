@@ -33,7 +33,19 @@ jobs:
             echo "::error::Faltan los secretos LLAVE_APK y CLAVE_LLAVE_APK (Settings → Secrets and variables → Actions)."
             exit 1
           fi
-          echo "$LLAVE_APK" | base64 -d > "$RUNNER_TEMP/llave.p12"
+          F="$RUNNER_TEMP/llave.p12"
+          # se limpian espacios y saltos de línea que a veces quedan al pegar
+          printf '%s' "$LLAVE_APK" | tr -d ' \r\n\t' | base64 -d > "$F" 2>/dev/null || true
+          echo "Largo del secreto LLAVE_APK: $(printf '%s' "$LLAVE_APK" | tr -d ' \r\n\t' | wc -c) caracteres (debe ser 3552) · largo de CLAVE_LLAVE_APK: $(printf '%s' "$CLAVE_LLAVE_APK" | wc -c) (debe ser 36)"
+          if ! keytool -list -storetype pkcs12 -keystore "$F" -storepass "$CLAVE_LLAVE_APK" -alias recibo >/dev/null 2>"$RUNNER_TEMP/k.txt"; then
+            # por si se pegó codificado dos veces
+            tr -d ' \r\n\t' < "$F" | base64 -d > "$F.2" 2>/dev/null && keytool -list -storetype pkcs12 -keystore "$F.2" -storepass "$CLAVE_LLAVE_APK" -alias recibo >/dev/null 2>&1 && mv "$F.2" "$F"
+          fi
+          if ! keytool -list -storetype pkcs12 -keystore "$F" -storepass "$CLAVE_LLAVE_APK" -alias recibo >/dev/null 2>&1; then
+            echo "::error::La llave de firma no se pudo abrir: $(head -c 200 "$RUNNER_TEMP/k.txt"). Revisa que LLAVE_APK tenga TODO el texto de LLAVE_APK.txt y CLAVE_LLAVE_APK el de CLAVE_LLAVE_APK.txt (sin cambiarlos de lugar)."
+            exit 1
+          fi
+          echo "Llave de firma revisada: OK"
 
       - uses: actions/setup-java@v4
         with:
