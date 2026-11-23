@@ -505,7 +505,11 @@
     });
     // Muestra la invitación lista para WhatsApp en el lugar indicado
     function mostrarInvitacion(dondeId, codigo, nombre) {
-      const enlace = location.origin + location.pathname + '#equipo=' + codigo;
+      // El enlace siempre apunta a la página pública: si la invitación se crea desde la app Android,
+      // location.origin es una dirección interna (appassets.androidplatform.net) que no abre en iPhone ni en PC.
+      const PAGINA_PUBLICA = 'https://penarandam273.github.io/seguimiento-recibo/';
+      const base = /\.github\.io$/.test(location.hostname) ? location.origin + location.pathname : PAGINA_PUBLICA;
+      const enlace = base + '#equipo=' + codigo;
       const texto = 'Hola' + (nombre ? ' ' + nombre : '') + ', te invito al Seguimiento de Recibo del CEDI. Abre este enlace en tu celular o PC y quedas conectado a las planillas del equipo' + (nombre ? '. Es personal: no lo reenvíes' : ' (no lo compartas fuera del equipo)') + ':\n' + enlace +
         '\nSi te pide código de equipo: ' + codigo + '\nDespués ve a Ajustes y escribe tu nombre en «Auditor de este equipo».';
       const msg = document.getElementById(dondeId);

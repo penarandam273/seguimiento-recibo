@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Recibo"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="icono-180.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Seguimiento de Recibo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,7 +46,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* barra superior */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
-.top-in{display:flex;align-items:center;gap:12px;padding-block:10px 6px}
+.top-in{display:flex;align-items:center;gap:12px;padding-block:10px 6px}@media (max-width:520px){.top-in{flex-wrap:wrap}.top-in>.brand{flex:1 1 100%}.top-in>.brand>div{min-width:0}.top-in>div:last-child{width:100%;justify-content:flex-start!important}}
 .brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
 .mark{width:34px;height:34px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
 .brand h1{font-size:21px}
@@ -380,7 +380,24 @@ details>div{display:flex;flex-direction:column;gap:10px;margin-top:8px}
     <button class="tab" role="tab" data-tab="ajustes" aria-selected="false">Ajustes</button>
   </nav>
 </header>
-<script>if (!window.ReciboApp) document.getElementById('appBtn').hidden = false;</script>
+<script>(function () {
+  var b = document.getElementById('appBtn');
+  if (window.ReciboApp) return;
+  b.hidden = false;
+  // iPhone y iPad no instalan APK: se usa la página y se agrega a la pantalla de inicio
+  var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!ios) return;
+  var enInicio = window.navigator.standalone === true;
+  if (enInicio) { b.hidden = true; return; }
+  b.removeAttribute('href');
+  b.title = 'Agregar Seguimiento de Recibo a la pantalla de inicio del iPhone';
+  b.innerHTML = '<span aria-hidden="true">📲</span><span>Agregar a inicio</span>';
+  b.addEventListener('click', function (e) {
+    e.preventDefault();
+    var t = 'En el iPhone no se instala el APK: usa esta misma página. Para tenerla como app: toca Compartir (el cuadro con la flecha hacia arriba) y luego «Agregar a pantalla de inicio».';
+    if (typeof toast === 'function') toast(t); else alert(t);
+  });
+})();</script>
 
 <main class="wrap">
   <!-- REGISTRO -->

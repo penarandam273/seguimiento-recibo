@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Preparar solo la pagina (sin la carpeta nube)
-        run: mkdir -p sitio && cp index.html entorno.js .nojekyll sitio/
+        run: mkdir -p sitio && cp index.html entorno.js icono-180.png .nojekyll sitio/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: sitio
